@@ -417,8 +417,8 @@
 
     <!-- Firebase & Core Application Logic -->
     <script type="module">
-        // Read-Only mode is set to FALSE so you can write messages & update orders
-        const isReadOnly = false; 
+        // Read-Only mode is set to TRUE so you can write messages & update orders
+        const isReadOnly = true; 
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc, addDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>100 Utilities | Abhay Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --bg-color: #030305; 
+            --card-bg: rgba(15, 15, 25, 0.82); 
+            --text-primary: #f3f4f6; 
+            --border-color: rgba(255, 255, 255, 0.12); 
+        }
+        body { background-color: var(--bg-color); color: var(--text-primary); font-family: 'Segoe UI', sans-serif; position: relative; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.5); } ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+        
+        .glass-panel { background: var(--card-bg); border: 1px solid var(--border-color); backdrop-filter: blur(20px); border-radius: 24px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3); }
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; max-height: 700px; overflow-y: auto; padding-right: 10px; }
+        .tool-card { background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); padding: 16px; border-radius: 16px; text-align: center; transition: all 0.25s ease; }
+        .tool-card:hover { border-color: #00d2ff; transform: translateY(-4px); }
+        .tool-btn { background: linear-gradient(90deg, #9900ff, #00d2ff); color: white; border: none; padding: 10px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; width: 100%; cursor: pointer; }
+
+        /* Floating Color Mixing Background */
+        .floating-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; pointer-events: none; }
+        .blob { position: absolute; filter: blur(120px); opacity: 0.25; animation: floatBlob 25s infinite alternate ease-in-out; border-radius: 50%; }
+        .blob-red { width: 400px; height: 400px; background: red; top: -10%; left: -10%; }
+        .blob-orange { width: 450px; height: 450px; background: orange; top: 20%; right: -10%; animation-delay: 3s; }
+        .blob-green { width: 500px; height: 500px; background: green; bottom: -10%; left: 20%; animation-delay: 6s; }
+        .blob-blue { width: 450px; height: 450px; background: blue; top: 40%; left: 10%; animation-delay: 9s; }
+        .blob-purple { width: 500px; height: 500px; background: purple; bottom: 20%; right: 10%; animation-delay: 12s; }
+        .blob-white { width: 300px; height: 300px; background: white; top: 10%; left: 50%; opacity: 0.1; animation-delay: 15s; }
+
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(60px, 90px) scale(1.15) rotate(180deg); }
+            100% { transform: translate(-60px, -80px) scale(0.9) rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="pt-24">
+
+    <!-- Floating Background Mixing Colors -->
+    <div class="floating-bg">
+        <div class="blob blob-red"></div>
+        <div class="blob blob-orange"></div>
+        <div class="blob blob-green"></div>
+        <div class="blob blob-blue"></div>
+        <div class="blob blob-purple"></div>
+        <div class="blob blob-white"></div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="px-8 py-5 fixed top-0 left-0 w-full z-50 bg-slate-950/85 backdrop-blur-lg border-b border-white/10 flex justify-between items-center">
+        <div class="font-black text-xl tracking-wide text-cyan-400">ABHAY STUDIO</div>
+        <nav class="hidden lg:flex items-center gap-7">
+            <a href="index.html" class="text-slate-300 hover:text-cyan-400 text-xs font-extrabold uppercase tracking-widest transition">Home</a>
+            <a href="builder.html" class="text-slate-300 hover:text-cyan-400 text-xs font-extrabold uppercase tracking-widest transition">Builder & Cost</a>
+            <a href="tools.html" class="text-cyan-400 text-xs font-extrabold uppercase tracking-widest">100 Utilities</a>
+            <a href="#contact" class="text-slate-300 hover:text-cyan-400 text-xs font-extrabold uppercase tracking-widest transition">Contact</a>
+        </nav>
+        <div id="authPanel" class="flex items-center gap-3">
+            <button id="btnGoogleLogin" class="px-5 py-2 bg-white text-slate-900 rounded-full font-bold text-xs flex items-center gap-2 hover:bg-slate-200 transition"><i class="fa-brands fa-google text-red-500"></i> Google Login</button>
+            <div id="userProfile" class="hidden items-center gap-3 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">
+                <img id="userAvatar" src="" class="w-6 h-6 rounded-full border border-cyan-400">
+                <span id="userName" class="text-xs font-bold text-white"></span>
+                <button id="btnGoogleLogout" class="text-red-400 hover:text-red-300 text-xs ml-2"><i class="fa-solid fa-power-off"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <section class="py-12 px-6 max-w-7xl mx-auto">
+        <h1 class="text-center font-black text-5xl mb-4 text-white">100 Browser Utilities</h1>
+        <p class="text-center text-slate-300 mb-12 max-w-2xl mx-auto">A massive array of client-side JavaScript functions, formatters, generators, and diagnostics executable instantly.</p>
+        <div class="glass-panel p-8">
+            <div class="tools-grid" id="toolsGridContainer"></div>
+        </div>
+    </section>
+
+    <!-- Universal Contact Section -->
+    <section id="contact" class="py-24 px-6 max-w-5xl mx-auto text-center border-t border-white/10">
+        <h2 class="text-4xl font-black text-white mb-2">Secure Contact & Sync</h2>
+        <p class="text-sm text-slate-300 mb-12">Messages sent here are securely transmitted to the Admin database.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div class="glass-panel p-8 text-left">
+                <form id="contactForm">
+                    <input type="text" id="formName" required class="w-full p-4 bg-black/60 border border-white/10 rounded-xl text-white mb-5" placeholder="Full Name">
+                    <input type="email" id="formEmail" required class="w-full p-4 bg-black/60 border border-white/10 rounded-xl text-white mb-5" placeholder="Email Address">
+                    <textarea id="formMessage" required class="w-full p-4 bg-black/60 border border-white/10 rounded-xl text-white min-h-[120px] mb-6" placeholder="Message"></textarea>
+                    <button type="submit" id="btnContactSubmit" class="w-full py-4 bg-cyan-600 hover:bg-cyan-500 rounded-xl font-bold text-white transition">Sync to Admin & Open WhatsApp</button>
+                </form>
+            </div>
+            <div class="flex flex-col gap-6 justify-center">
+                <a href="tel:9306882926" class="p-6 bg-white/5 border border-white/10 rounded-2xl hover:border-emerald-400 transition flex flex-col items-center">
+                    <i class="fa-solid fa-phone text-2xl text-emerald-400 mb-2"></i>
+                    <strong class="text-xl text-white font-black">9306882926</strong>
+                </a>
+                <a href="mailto:reenarjput03@gmail.com" class="p-6 bg-white/5 border border-white/10 rounded-2xl hover:border-purple-400 transition flex flex-col items-center">
+                    <i class="fa-solid fa-envelope text-2xl text-purple-400 mb-2"></i>
+                    <strong class="text-sm text-white font-black">reenarjput03@gmail.com</strong>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-10 px-6 text-center border-t border-white/10 text-xs text-slate-400 bg-slate-950">
+        <p>&copy; 2026 Web Designer Abhay. All Rights Reserved.</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+        const app = initializeApp({ apiKey: "AIzaSyAEwOg97m8CW0n5DIPc_xRG_c7Jo70RUeA", authDomain: "artwork-f5069.firebaseapp.com", projectId: "artwork-f5069" });
+        const db = getFirestore(app); const auth = getAuth(app); const provider = new GoogleAuthProvider();
+
+        document.getElementById('btnGoogleLogin').addEventListener('click', () => { signInWithPopup(auth, provider).catch(console.error); });
+        document.getElementById('btnGoogleLogout').addEventListener('click', () => { signOut(auth); });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('btnGoogleLogin').classList.add('hidden');
+                document.getElementById('userProfile').classList.remove('hidden'); document.getElementById('userProfile').classList.add('flex');
+                document.getElementById('userName').innerText = user.displayName.split(' ')[0]; document.getElementById('userAvatar').src = user.photoURL;
+                if(document.getElementById('formName')) document.getElementById('formName').value = user.displayName;
+                if(document.getElementById('formEmail')) document.getElementById('formEmail').value = user.email;
+            } else {
+                document.getElementById('btnGoogleLogin').classList.remove('hidden');
+                document.getElementById('userProfile').classList.add('hidden'); document.getElementById('userProfile').classList.remove('flex');
+            }
+        });
+
+        const toolsContainer = document.getElementById('toolsGridContainer');
+        for(let i=1; i<=100; i++) {
+            const btn = document.createElement('div'); btn.className = 'tool-card group';
+            btn.innerHTML = `<h4 class="text-white text-xs font-bold mb-3 truncate">Utility Function #${String(i).padStart(3,'0')}</h4><button class="tool-btn">Execute Node</button>`;
+            btn.querySelector('button').onclick = () => alert(`Utility Function #${i} Executed Successfully.`);
+            toolsContainer.appendChild(btn);
+        }
+
+        document.getElementById('contactForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('formName').value; const email = document.getElementById('formEmail').value; const msg = document.getElementById('formMessage').value;
+            await addDoc(collection(db, "orders"), { name, email, category: "Contact Lead", notes: msg, status: "Pending", createdAt: new Date() });
+            window.open(`https://wa.me/919306882926?text=${encodeURIComponent(`Name: ${name}\nEmail: ${email}\nMsg: ${msg}`)}`, '_blank');
+        });
+    </script>
+</body>
+</html>

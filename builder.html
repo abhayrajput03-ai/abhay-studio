@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurator & Builder | Abhay Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --bg-color: #030305; 
+            --card-bg: rgba(15, 15, 25, 0.82); 
+            --text-primary: #f3f4f6; 
+            --border-color: rgba(255, 255, 255, 0.12); 
+        }
+        body { background-color: var(--bg-color); color: var(--text-primary); font-family: 'Segoe UI', sans-serif; position: relative; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.5); } ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+        
+        .glass-panel { background: var(--card-bg); border: 1px solid var(--border-color); backdrop-filter: blur(20px); border-radius: 24px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3); }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; margin: 15px 0; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: #00d2ff; cursor: pointer; margin-top: -10px; box-shadow: 0 0 10px #00d2ff; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        /* Floating Color Mixing Background */
+        .floating-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; pointer-events: none; }
+        .blob { position: absolute; filter: blur(120px); opacity: 0.25; animation: floatBlob 25s infinite alternate ease-in-out; border-radius: 50%; }
+        .blob-red { width: 400px; height: 400px; background: red; top: -10%; left: -10%; }
+        .blob-orange { width: 450px; height: 450px; background: orange; top: 20%; right: -10%; animation-delay: 3s; }
+        .blob-green { width: 500px; height: 500px; background: green; bottom: -10%; left: 20%; animation-delay: 6s; }
+        .blob-blue { width: 450px; height: 450px; background: blue; top: 40%; left: 10%; animation-delay: 9s; }
+        .blob-purple { width: 500px; height: 500px; background: purple; bottom: 20%; right: 10%; animation-delay: 12s; }
+        .blob-white { width: 300px; height: 300px; background: white; top: 10%; left: 50%; opacity: 0.1; animation-delay: 15s; }
+
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(60px, 90px) scale(1.15) rotate(180deg); }
+            100% { transform: translate(-60px, -80px) scale(0.9) rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="pt-24">
+
+    <!-- Floating Background Mixing Colors -->
+    <div class="floating-bg">
+        <div class="blob blob-red"></div>
+        <div class="blob blob-orange"></div>
+        <div class="blob blob-green"></div>
+        <div class="blob blob-blue"></div>
+        <div class="blob blob-purple"></div>
+        <div class="blob blob-white"></div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="px-8 py-5 fixed top-0 left-0 w-full z-50 bg-slate-950/85 backdrop-blur-lg border-b border-white/10 flex justify-between items-center">
+        <div class="font-black text-xl tracking-wide text-cyan-400">ABHAY STUDIO</div>
+        <nav class="hidden lg:flex items-center gap-7">
+            <a href="index.html" class="text-slate-300 hover:text-cyan-400 text-xs font-extrabold uppercase tracking-widest transition">Home</a>
+            <a href="builder.html" class="text-cyan-400 text-xs font-extrabold uppercase tracking-widest">Builder & Cost</a>
+            <a href="tools.html" class="text-slate-300 hover:text-cyan-400 text-xs font-extrabold uppercase tracking-widest transition">100 Utilities</a>
+            <a href="#contact" class="text-slate-300 hover:text-cyan-400 text-xs font-extrabold uppercase tracking-widest transition">Contact</a>
+        </nav>
+        <div id="authPanel" class="flex items-center gap-3">
+            <button id="btnGoogleLogin" class="px-5 py-2 bg-white text-slate-900 rounded-full font-bold text-xs flex items-center gap-2 hover:bg-slate-200 transition"><i class="fa-brands fa-google text-red-500"></i> Google Login</button>
+            <div id="userProfile" class="hidden items-center gap-3 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">
+                <img id="userAvatar" src="" class="w-6 h-6 rounded-full border border-cyan-400">
+                <span id="userName" class="text-xs font-bold text-white"></span>
+                <button id="btnGoogleLogout" class="text-red-400 hover:text-red-300 text-xs ml-2"><i class="fa-solid fa-power-off"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <section class="py-12 px-6 max-w-6xl mx-auto">
+        <h1 class="text-center font-black text-5xl mb-4 text-white">100+ Website Configurator</h1>
+        <p class="text-center text-slate-300 mb-16 max-w-2xl mx-auto">Select a category and securely sync your order to the Admin database.</p>
+
+        <div class="glass-panel p-10 mb-20">
+            <input type="text" id="categorySearchInput" onkeyup="window.filterWebsiteTypes()" placeholder="Search from 100+ industries..." class="w-full py-4 px-5 bg-black/60 border border-white/15 rounded-xl text-white outline-none focus:border-cyan-400 mb-6">
+            <div id="websiteTypesContainer" class="max-h-96 overflow-y-auto space-y-3 mb-8 pr-3"></div>
+            
+            <div class="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" id="configClientName" placeholder="Your Full Name" class="w-full p-4 bg-black/60 border border-white/15 rounded-xl text-white outline-none" required>
+                <input type="email" id="configClientEmail" placeholder="Your Email Address" class="w-full p-4 bg-black/60 border border-white/15 rounded-xl text-white outline-none" required>
+            </div>
+            <textarea id="clientProjectNotes" placeholder="Project instructions & reference links..." class="w-full p-5 bg-black/60 border border-white/15 rounded-xl text-white outline-none min-h-[120px] mb-8"></textarea>
+            
+            <button onclick="window.submitConfiguratorOrder()" id="btnConfigSubmit" class="w-full py-5 bg-emerald-600 hover:bg-emerald-500 rounded-2xl font-black text-white text-lg transition shadow-lg">Sync Order & Open WhatsApp</button>
+        </div>
+
+        <!-- COST ESTIMATOR -->
+        <h2 class="text-center font-black text-4xl mb-4 text-white">Parametric Cost Estimator</h2>
+        <div class="glass-panel p-10 grid grid-cols-1 lg:grid-cols-2 gap-12 mt-12">
+            <div>
+                <h3 class="text-xl font-bold text-cyan-400 mb-6 border-b border-white/10 pb-4">Configure Variables</h3>
+                <div class="mb-8"><div class="flex justify-between items-center mb-2"><span class="text-sm font-bold text-slate-300">Number of Pages</span><span id="pageCountDisplay" class="text-cyan-400 font-bold">1 Page</span></div><input type="range" id="pageSlider" min="1" max="20" value="1" oninput="window.updateSliders()"></div>
+                <div class="mb-8"><div class="flex justify-between items-center mb-2"><span class="text-sm font-bold text-slate-300">Timeline</span><span id="timelineDisplay" class="text-purple-400 font-bold">Standard</span></div><input type="range" id="timelineSlider" min="1" max="3" value="2" oninput="window.updateSliders()"></div>
+            </div>
+            <div class="flex flex-col justify-between bg-black/50 p-10 rounded-3xl border border-white/10">
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Live Estimate Summary</h3>
+                    <div class="text-6xl font-black text-emerald-400 mb-4" id="complexTotalDisplay">INR 1,000</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Universal Contact Section -->
+    <section id="contact" class="py-24 px-6 max-w-5xl mx-auto text-center border-t border-white/10">
+        <h2 class="text-4xl font-black text-white mb-2">Secure Contact & Sync</h2>
+        <p class="text-sm text-slate-300 mb-12">Messages sent here are securely transmitted to the Admin database.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div class="glass-panel p-8 text-left">
+                <form id="contactForm">
+                    <input type="text" id="formName" required class="w-full p-4 bg-black/60 border border-white/10 rounded-xl text-white mb-5" placeholder="Full Name">
+                    <input type="email" id="formEmail" required class="w-full p-4 bg-black/60 border border-white/10 rounded-xl text-white mb-5" placeholder="Email Address">
+                    <textarea id="formMessage" required class="w-full p-4 bg-black/60 border border-white/10 rounded-xl text-white min-h-[120px] mb-6" placeholder="Message"></textarea>
+                    <button type="submit" id="btnContactSubmit" class="w-full py-4 bg-cyan-600 hover:bg-cyan-500 rounded-xl font-bold text-white transition">Sync to Admin & Open WhatsApp</button>
+                </form>
+            </div>
+            <div class="flex flex-col gap-6 justify-center">
+                <a href="tel:9306882926" class="p-6 bg-white/5 border border-white/10 rounded-2xl hover:border-emerald-400 transition flex flex-col items-center">
+                    <i class="fa-solid fa-phone text-2xl text-emerald-400 mb-2"></i>
+                    <strong class="text-xl text-white font-black">9306882926</strong>
+                </a>
+                <a href="mailto:reenarjput03@gmail.com" class="p-6 bg-white/5 border border-white/10 rounded-2xl hover:border-purple-400 transition flex flex-col items-center">
+                    <i class="fa-solid fa-envelope text-2xl text-purple-400 mb-2"></i>
+                    <strong class="text-sm text-white font-black">reenarjput03@gmail.com</strong>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-10 px-6 text-center border-t border-white/10 text-xs text-slate-400 bg-slate-950">
+        <p>&copy; 2026 Web Designer Abhay. All Rights Reserved.</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+        const app = initializeApp({ apiKey: "AIzaSyAEwOg97m8CW0n5DIPc_xRG_c7Jo70RUeA", authDomain: "artwork-f5069.firebaseapp.com", projectId: "artwork-f5069" });
+        const db = getFirestore(app); const auth = getAuth(app); const provider = new GoogleAuthProvider();
+
+        document.getElementById('btnGoogleLogin').addEventListener('click', () => { signInWithPopup(auth, provider).catch(console.error); });
+        document.getElementById('btnGoogleLogout').addEventListener('click', () => { signOut(auth); });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('btnGoogleLogin').classList.add('hidden');
+                document.getElementById('userProfile').classList.remove('hidden'); document.getElementById('userProfile').classList.add('flex');
+                document.getElementById('userName').innerText = user.displayName.split(' ')[0]; document.getElementById('userAvatar').src = user.photoURL;
+                if(document.getElementById('configClientName')) document.getElementById('configClientName').value = user.displayName;
+                if(document.getElementById('configClientEmail')) document.getElementById('configClientEmail').value = user.email;
+                if(document.getElementById('formName')) document.getElementById('formName').value = user.displayName;
+                if(document.getElementById('formEmail')) document.getElementById('formEmail').value = user.email;
+            } else {
+                document.getElementById('btnGoogleLogin').classList.remove('hidden');
+                document.getElementById('userProfile').classList.add('hidden'); document.getElementById('userProfile').classList.remove('flex');
+            }
+        });
+
+        const categories = ["E-Commerce Store", "Portfolio", "SaaS Landing Page", "Corporate", "Blog", "Real Estate", "Restaurant", "Gym", "Education", "Medical Clinic"];
+        const container = document.getElementById('websiteTypesContainer');
+        for(let i=0; i<100; i++) {
+            let catName = categories[i % categories.length] + " " + (i > 9 ? `Variant ${i}` : "");
+            let price = "INR " + (1000 + ((i * 40) % 4001)).toLocaleString();
+            let div = document.createElement('div');
+            div.className = 'flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10 cursor-pointer hover:border-cyan-400 category-item-row';
+            div.innerHTML = `<div class="flex gap-4"><input type="radio" name="websiteCategoryRadio" id="cat_${i}" value="${catName}" class="w-5 h-5"><label for="cat_${i}" class="text-sm font-bold text-white">${catName}</label></div><span class="text-emerald-400 font-black">${price}</span>`;
+            container.appendChild(div);
+        }
+
+        window.filterWebsiteTypes = function() {
+            const q = document.getElementById('categorySearchInput').value.toLowerCase();
+            document.querySelectorAll('.category-item-row').forEach(row => { row.style.display = row.innerText.toLowerCase().includes(q) ? 'flex' : 'none'; });
+        };
+
+        window.submitConfiguratorOrder = async function() {
+            const selected = document.querySelector('input[name="websiteCategoryRadio"]:checked');
+            const name = document.getElementById('configClientName').value; const email = document.getElementById('configClientEmail').value; const notes = document.getElementById('clientProjectNotes').value;
+            if (!selected || !name || !email) { alert("Complete fields."); return; }
+            try {
+                await addDoc(collection(db, "orders"), { name, email, category: selected.value, notes, status: "Pending", createdAt: new Date() });
+                window.open(`https://wa.me/919306882926?text=${encodeURIComponent(`=== NEW ORDER ===\nName: ${name}\nCategory: ${selected.value}\nNotes: ${notes}`)}`, '_blank');
+            } catch (e) { console.error(e); }
+        };
+
+        window.updateSliders = function() {
+            const p = document.getElementById('pageSlider').value; document.getElementById('pageCountDisplay').innerText = p + (p>1?" Pages":" Page");
+            const t = document.getElementById('timelineSlider').value; document.getElementById('timelineDisplay').innerText = t == 1 ? "Rush" : (t == 2 ? "Standard" : "Relaxed");
+            let base = 1000 + ((p-1)*500); if(t==1) base *= 1.5; if(t==3) base *= 0.8;
+            document.getElementById('complexTotalDisplay').innerText = 'INR ' + Math.round(base).toLocaleString();
+        };
+
+        document.getElementById('contactForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('formName').value; const email = document.getElementById('formEmail').value; const msg = document.getElementById('formMessage').value;
+            await addDoc(collection(db, "orders"), { name, email, category: "Contact Lead", notes: msg, status: "Pending", createdAt: new Date() });
+            window.open(`https://wa.me/919306882926?text=${encodeURIComponent(`Name: ${name}\nEmail: ${email}\nMsg: ${msg}`)}`, '_blank');
+        });
+    </script>
+</body>
+</html>

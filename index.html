@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Core Flexa | Elite Fitness Gear & Sweat Belts | Owner: Neelam Deshwal</title>
+    <meta name="description" content="Core Flexa - Premium fitness sweat belts and waist trainers by Neelam Deshwal. Engineered with non-tearable neoprene and 3X thermal toning.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Three.js WebGL Core -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Razorpay Checkout SDK Integration -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #020813;
+            --text-main: #f0fdf4;
+            --text-muted: #cbd5e1;
+            --accent-primary: #00f3ff;
+            --accent-secondary: #10b981;
+            --glass-bg: rgba(4, 15, 30, 0.95);
+            --glass-border: rgba(0, 243, 255, 0.4);
+            --font-display: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+            --font-code: 'Share Tech Mono', monospace;
+            --transition-smooth: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            --nav-height: 75px;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; font-size: 16px; width: 100%; overflow-x: hidden; }
+
+        body {
+            background-color: var(--bg-color); color: var(--text-main);
+            font-family: var(--font-body); line-height: 1.6; width: 100%; overflow-x: hidden;
+            -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+        }
+
+        #bg-slideshow-container {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -2; overflow: hidden; pointer-events: none; background-color: #020813;
+        }
+        .slide-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center; opacity: 0;
+            transition: opacity 1.8s ease-in-out; filter: contrast(1.2) brightness(0.7);
+        }
+        .slide-bg.active { opacity: 0.65; }
+        .slideshow-fade-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at center, rgba(2,8,19,0.2) 0%, rgba(2,8,19,0.88) 80%, #020813 100%);
+            z-index: -1; pointer-events: none;
+        }
+
+        #main-site-canvas {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -3; pointer-events: none; will-change: transform;
+        }
+
+        #scroll-tracker {
+            position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), #38bdf8);
+            z-index: 10001; box-shadow: 0 0 10px var(--accent-primary);
+            transition: width 0.1s linear;
+        }
+
+        .sticky-owner-bar {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: rgba(2, 8, 19, 0.98); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border); z-index: 1006;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 5%; font-family: var(--font-display); font-size: 0.75rem; letter-spacing: 1px;
+        }
+        .sticky-owner-bar a {
+            color: var(--accent-primary); text-decoration: none;
+            display: flex; align-items: center; gap: 6px; transition: var(--transition-smooth);
+        }
+        .sticky-owner-bar a:hover { color: #fff; text-shadow: 0 0 12px var(--accent-primary); }
+
+        .sticky-highlights-bar {
+            position: fixed; top: 38px; left: 0; width: 100%;
+            background: linear-gradient(90deg, #041024, #0b2545, #041024);
+            border-bottom: 1px solid rgba(0, 243, 255, 0.3); z-index: 1005;
+            display: grid; grid-template-columns: repeat(4, 1fr); text-align: center;
+            padding: 8px 2%; font-family: var(--font-display); font-size: 0.75rem;
+            text-transform: uppercase; letter-spacing: 1px; color: #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+        }
+        .sticky-highlight-item { display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
+        .sticky-highlight-item i { color: var(--accent-secondary); }
+
+        .glass-panel {
+            background: var(--glass-bg); backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border);
+            border-radius: 20px; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.8);
+            position: relative; overflow: hidden; transition: var(--transition-smooth);
+        }
+        .glass-panel:hover {
+            border-color: rgba(0, 243, 255, 0.7);
+            box-shadow: 0 25px 65px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 243, 255, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .container { width: 100%; max-width: 1250px; margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 1; }
+        .section-padding { padding: 90px 0; }
+
+        .section-title {
+            font-family: var(--font-display); font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+            text-align: center; margin-bottom: 2.2rem; position: relative;
+            text-transform: uppercase; letter-spacing: 2px; color: var(--text-main);
+            text-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+        }
+        .section-title::after {
+            content: ''; position: absolute; bottom: -10px; left: 50%;
+            transform: translateX(-50%); width: 70px; height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            box-shadow: 0 0 15px var(--accent-primary); border-radius: 2px;
+        }
+
+        .highlight { color: var(--accent-primary); text-shadow: 0 0 12px rgba(0, 243, 255, 0.5); }
+
+        .btn {
+            display: inline-block; padding: 0.9rem 2.2rem; font-family: var(--font-display);
+            font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1.5px;
+            color: #020813; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none; border-radius: 10px; cursor: pointer; position: relative; overflow: hidden;
+            transition: var(--transition-smooth); text-decoration: none; z-index: 1;
+            box-shadow: 0 4px 20px rgba(0, 243, 255, 0.4); text-align: center;
+        }
+        .btn:hover { box-shadow: 0 8px 35px rgba(0, 243, 255, 0.8); transform: translateY(-3px) scale(1.02); color: #020813; }
+
+        header {
+            position: fixed; top: 74px; left: 0; width: 100%; height: var(--nav-height);
+            z-index: 1000; transition: var(--transition-smooth); border-bottom: 1px solid transparent;
+            background: rgba(2, 8, 19, 0.92); backdrop-filter: blur(12px);
+        }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; height: 100%; }
+        .logo {
+            font-family: var(--font-display); font-size: clamp(1.1rem, 2vw, 1.4rem); font-weight: 900;
+            color: #fff; text-decoration: none; letter-spacing: 2px; display: flex; align-items: center; gap: 8px;
+        }
+
+        .nav-links { display: flex; list-style: none; gap: 1.5rem; align-items: center; }
+        .nav-links li a {
+            color: var(--text-main); text-decoration: none; font-family: var(--font-code);
+            font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; transition: var(--transition-smooth);
+        }
+        .nav-links li a:hover { color: var(--accent-primary); text-shadow: 0 0 10px var(--accent-primary); }
+
+        .auth-nav-btn {
+            background: rgba(0, 243, 255, 0.15); border: 1px solid var(--accent-primary); color: #fff;
+            padding: 8px 16px; border-radius: 20px; font-family: var(--font-code); font-size: 0.85rem;
+            cursor: pointer; display: flex; align-items: center; gap: 6px; transition: var(--transition-smooth);
+        }
+        .auth-nav-btn:hover { background: var(--accent-primary); color: #020813; box-shadow: 0 0 15px var(--accent-primary); }
+
+        .mobile-menu-btn { display: none; background: transparent; border: none; color: var(--accent-primary); font-size: 1.8rem; cursor: pointer; z-index: 1001; }
+
+        #home {
+            min-height: 90vh; display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden; padding: calc(var(--nav-height) + 6rem) 0 3rem;
+        }
+        .hero-outline-card {
+            background: #040e1d;
+            border: 2px solid rgba(0, 243, 255, 0.5); border-radius: 26px;
+            padding: clamp(2rem, 5vw, 4rem); max-width: 900px; width: 100%; margin: 0 auto;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9), 0 0 50px rgba(0, 243, 255, 0.25);
+            text-align: center;
+        }
+        .hero-main-title {
+            font-family: var(--font-display); font-size: clamp(2.2rem, 6vw, 4.2rem);
+            font-weight: 900; line-height: 1.1; margin-bottom: 1.2rem; text-transform: uppercase;
+            color: #ffffff; text-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
+        }
+        .hero-subtitle-text { font-size: clamp(1rem, 2.2vw, 1.3rem); color: #e2e8f0; margin-bottom: 2.2rem; font-family: var(--font-code); line-height: 1.6; }
+
+        .product-showcase-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 2.5rem; align-items: center; }
+        .product-img-box { border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border); box-shadow: 0 20px 50px rgba(0,0,0,0.8); background: #000; display: flex; align-items: center; justify-content: center; min-height: 320px; }
+        .product-img-box img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s; }
+        .product-img-box:hover img { transform: scale(1.04); }
+
+        .product-details h3 { font-family: var(--font-display); font-size: clamp(1.5rem, 2.8vw, 2.1rem); margin-bottom: 0.8rem; color: #fff; }
+        .product-price-tag { font-family: var(--font-display); font-size: 2.2rem; font-weight: 900; color: var(--accent-secondary); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; text-shadow: 0 0 15px rgba(16,185,129,0.4); }
+        .product-price-tag span.old-price { font-size: 1.2rem; color: var(--text-muted); text-decoration: line-through; }
+        .product-desc { color: var(--text-muted); font-size: 1rem; margin-bottom: 1.2rem; line-height: 1.6; }
+        
+        .product-specs-list { list-style: none; margin-bottom: 1.8rem; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .product-specs-list li { font-family: var(--font-code); font-size: 0.88rem; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
+        .product-specs-list li::before { content: '✓'; color: var(--accent-secondary); font-weight: bold; }
+
+        .contact-box-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .contact-card {
+            background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px;
+            padding: 2rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1rem;
+            transition: var(--transition-smooth); text-decoration: none; color: inherit;
+        }
+        .contact-card:hover { border-color: var(--accent-primary); transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,243,255,0.25); }
+        .contact-card i { font-size: 2.2rem; color: var(--accent-primary); margin-bottom: 0.2rem; }
+        .contact-card h4 { font-family: var(--font-display); font-size: 1.1rem; color: #fff; }
+        .contact-card p { font-family: var(--font-code); font-size: 0.95rem; color: var(--text-muted); word-break: break-all; }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(2, 8, 19, 0.92); backdrop-filter: blur(15px); z-index: 3000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 1rem;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal-content {
+            background: #040e1d; border: 1px solid var(--accent-primary); border-radius: 20px;
+            padding: clamp(1.5rem, 3.5vw, 2.2rem); width: 100%; max-width: 580px; text-align: left;
+            position: relative; box-shadow: 0 0 60px rgba(0, 243, 255, 0.4); max-height: 90vh; overflow-y: auto;
+        }
+        .modal-close-btn { position: absolute; top: 12px; right: 16px; background: transparent; border: none; color: #fff; font-size: 1.6rem; cursor: pointer; }
+        .modal-close-btn:hover { color: var(--accent-primary); }
+
+        .form-group { margin-bottom: 1.1rem; }
+        .form-label { display: block; font-family: var(--font-code); font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem; text-transform: uppercase; }
+        .form-control {
+            width: 100%; padding: 0.85rem 1.1rem; background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #fff;
+            font-family: var(--font-body); font-size: 1rem; outline: none; transition: var(--transition-smooth);
+        }
+        .form-control:focus { border-color: var(--accent-primary); box-shadow: 0 0 15px rgba(0, 243, 255, 0.3); }
+
+        .dashboard-card { text-align: center; max-width: 620px !important; }
+        .user-avatar-lg { width: 75px; height: 75px; border-radius: 50%; border: 2px solid var(--accent-primary); object-fit: cover; margin: 0 auto 0.8rem; }
+        .dash-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 1.2rem; text-align: left; }
+        .dash-tile {
+            background: rgba(0, 243, 255, 0.05); border: 1px solid var(--glass-border); border-radius: 12px;
+            padding: 14px; cursor: pointer; transition: var(--transition-smooth); display: flex; flex-direction: column; gap: 4px;
+        }
+        .dash-tile:hover { background: rgba(0, 243, 255, 0.15); border-color: var(--accent-primary); transform: translateY(-2px); }
+        .dash-tile i { font-size: 1.4rem; color: var(--accent-primary); margin-bottom: 4px; }
+        .dash-tile h5 { font-family: var(--font-display); font-size: 0.9rem; color: #fff; }
+        .dash-tile p { font-size: 0.78rem; color: var(--text-muted); }
+
+        .sub-panel { display: none; margin-top: 1rem; background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); padding: 15px; border-radius: 12px; text-align: left; max-height: 240px; overflow-y: auto; }
+        .sub-panel.active { display: block; }
+
+        #sticky-cart-widget {
+            position: fixed; bottom: 95px; right: 25px; z-index: 10000;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: #020813; padding: 10px 18px; border-radius: 30px; font-family: var(--font-display);
+            font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 5px 25px rgba(0, 243, 255, 0.5); border: 2px solid rgba(255,255,255,0.3);
+            transition: var(--transition-smooth); animation: cartBounce 3s infinite alternate;
+        }
+        @keyframes cartBounce { 0% { transform: translateY(0); } 100% { transform: translateY(-5px); } }
+        #sticky-cart-widget:hover { transform: scale(1.08); }
+
+        #ai-fab-container { position: fixed; bottom: 25px; right: 25px; z-index: 10000; }
+        .ai-fab-pill-btn {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: #020813; padding: 12px 22px; border-radius: 30px; font-family: var(--font-display);
+            font-size: 0.85rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 6px 25px rgba(0, 243, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.35);
+            transition: var(--transition-smooth); text-transform: uppercase; letter-spacing: 1px;
+            animation: aiPillGlow 3s infinite alternate;
+        }
+        @keyframes aiPillGlow {
+            0% { box-shadow: 0 5px 20px rgba(0, 243, 255, 0.4); }
+            100% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.8); }
+        }
+        .ai-fab-pill-btn:hover { transform: translateY(-3px) scale(1.05); }
+
+        .ai-chat-popup {
+            position: fixed; bottom: 85px; right: 25px; width: 360px; height: 500px;
+            background: rgba(4, 15, 30, 0.98); backdrop-filter: blur(25px);
+            border: 1px solid var(--accent-primary); border-radius: 20px;
+            display: flex; flex-direction: column; overflow: hidden; z-index: 10000;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 243, 255, 0.3);
+            transform: scale(0); opacity: 0; transform-origin: bottom right; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .ai-chat-popup.active { transform: scale(1); opacity: 1; }
+
+        .chat-header {
+            background: linear-gradient(90deg, rgba(0, 243, 255, 0.15), rgba(16, 185, 129, 0.15));
+            padding: 14px 18px; border-bottom: 1px solid var(--glass-border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .chat-header h4 { font-family: var(--font-display); font-size: 0.95rem; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .chat-status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-primary); box-shadow: 0 0 8px var(--accent-primary); }
+
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; text-align: left; }
+        .message { padding: 10px 14px; border-radius: 12px; max-width: 88%; font-size: 0.9rem; line-height: 1.45; }
+        .message.bot { background: rgba(0, 243, 255, 0.08); border: 1px solid rgba(0, 243, 255, 0.25); color: #fff; align-self: flex-start; }
+        .message.user { background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(16, 185, 129, 0.5); color: #fff; align-self: flex-end; }
+
+        .chat-questions-list {
+            display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; background: rgba(2, 8, 19, 0.95);
+            border-top: 1px solid rgba(255, 255, 255, 0.08); max-height: 140px; overflow-y: auto;
+        }
+        .question-chip {
+            background: rgba(0, 243, 255, 0.08); border: 1px solid rgba(0, 243, 255, 0.25);
+            color: #38bdf8; font-family: var(--font-body); font-size: 0.85rem; padding: 6px 10px;
+            border-radius: 8px; cursor: pointer; text-align: left; transition: 0.2s;
+        }
+        .question-chip:hover { background: var(--accent-primary); color: #020813; }
+
+        #whatsapp-fab {
+            position: fixed; bottom: 25px; left: 20px; z-index: 10000;
+            width: 50px; height: 50px; background: #25d366; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(37, 211, 102, 0.5);
+            transition: var(--transition-smooth); text-decoration: none; border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        #whatsapp-fab:hover { transform: scale(1.12) rotate(-10deg); }
+        #whatsapp-fab svg { width: 26px; height: 26px; fill: #fff; }
+
+        footer { background: #01040a; padding: 2rem 0; border-top: 1px solid var(--glass-border); text-align: center; position: relative; z-index: 10; }
+        .copyright { color: var(--text-muted); font-family: var(--font-code); font-size: 0.85rem; }
+
+        @media screen and (max-width: 900px) {
+            .product-showcase-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .product-specs-list { grid-template-columns: 1fr; }
+            .sticky-highlights-bar { font-size: 0.65rem; padding: 6px 1%; display: none; }
+            .sticky-owner-bar { font-size: 0.65rem; padding: 6px 3%; }
+        }
+        @media screen and (max-width: 768px) {
+            .nav-links {
+                position: fixed; top: calc(var(--nav-height) + 74px); left: -100%; width: 100%;
+                height: calc(100vh - var(--nav-height) - 74px); background: rgba(2, 8, 19, 0.98); backdrop-filter: blur(20px);
+                flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; transition: 0.4s ease-in-out; z-index: 999;
+                padding-bottom: 3rem; overflow-y: auto;
+            }
+            .nav-links.active { left: 0; }
+            .mobile-menu-btn { display: block; }
+            .ai-chat-popup { width: 90vw; right: 5vw; height: 440px; }
+            #sticky-cart-widget { bottom: 85px; right: 15px; }
+            .dash-grid { grid-template-columns: 1fr; }
+            .auth-nav-btn { width: 80%; justify-content: center; padding: 12px; font-size: 1rem; }
+        }
+
+        .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+    <div id="scroll-tracker"></div>
+
+    <div id="bg-slideshow-container"></div>
+    <div class="slideshow-fade-overlay"></div>
+
+    <canvas id="main-site-canvas"></canvas>
+
+    <div class="sticky-highlights-bar">
+        <div class="sticky-highlight-item"><i class="fa-solid fa-bolt"></i> Lightning fast delivery</div>
+        <div class="sticky-highlight-item"><i class="fa-solid fa-star"></i> 4.9* reviews</div>
+        <div class="sticky-highlight-item"><i class="fa-solid fa-truck-fast"></i> Cash on delivery</div>
+        <div class="sticky-highlight-item"><i class="fa-solid fa-headset"></i> 24*7 support</div>
+    </div>
+
+    <div class="sticky-owner-bar">
+        <span>Owner & Founder: <strong style="color: var(--accent-primary);">Neelam Deshwal</strong></span>
+        <a href="tel:+919671151565">📞 9671151565</a>
+    </div>
+
+    <header id="header">
+        <div class="container nav-container">
+            <a href="#home" class="logo">CORE <span class="highlight">FLEXA</span></a>
+            
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle Navigation">☰</button>
+            
+            <ul class="nav-links" id="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#product">Sweat Belt</a></li>
+                <li><a href="#details">Product Details</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li>
+                    <button class="auth-nav-btn" id="authNavBtn" onclick="handleAuthAction()">
+                        <i class="fa-solid fa-user"></i> <span id="authBtnText">Google Login</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+        <section id="home">
+            <div class="container">
+                <div class="hero-outline-card reveal active">
+                    <div style="font-family: var(--font-code); color: var(--accent-primary); letter-spacing: 2px; font-size: 0.85rem; margin-bottom: 1rem;">
+                        ★ ELITE FITNESS GEAR BY NEELAM DESHWAL ★
+                    </div>
+                    <h1 class="hero-main-title">Core Flexa</h1>
+                    <p class="hero-subtitle-text">Maximize your workouts with elite fitness gear engineered for maximum sweat, core support, and ultimate performance.</p>
+                    <a href="#product" class="btn">Shop Sweat Belt Now</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="product" class="section-padding">
+            <div class="container">
+                <h2 class="section-title reveal">Featured Product</h2>
+                <div class="product-showcase-grid glass-panel reveal" style="padding: clamp(1.5rem, 3.5vw, 2.5rem);">
+                    <div class="product-img-box">
+                        <img src="https://i.ibb.co/JRh3bJfm/41-DXR9rcbx-L-SY300-SX300-QL70-FMwebp.webp" alt="FIT PICK Sweat Belt">
+                    </div>
+                    <div class="product-details">
+                        <h3>FIT PICK Sweat Belt, Stomach Belt for Women and Men</h3>
+                        <div class="product-price-tag">
+                            ₹898 <span class="old-price">₹2,999</span>
+                            <span style="font-size: 0.9rem; background: rgba(16,185,129,0.15); color: var(--accent-secondary); padding: 4px 10px; border-radius: 6px;">71% OFF</span>
+                        </div>
+                        <p class="product-desc">Non-tearable Sauna Belt Waist Trainer designed to enhance workouts, tone effectively through 3X core sweating, and correct bad posture during daily routines.</p>
+                        
+                        <ul class="product-specs-list">
+                            <li>Brand: FIT PICK</li>
+                            <li>Size: 46 Inches</li>
+                            <li>Colour: Black</li>
+                            <li>Material: Neoprene (SBR)</li>
+                            <li>Use for: Stomach & Waist</li>
+                            <li>Closure: Hook & Loop</li>
+                        </ul>
+
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <button class="btn" onclick="openCheckoutModal('cod')" style="flex: 1;">Buy via COD</button>
+                            <button class="btn" onclick="openCheckoutModal('upi')" style="flex: 1; background: linear-gradient(135deg, #10b981, #059669); color: #fff;">Pay via PhonePe / UPI / Cards</button>
+                            <button class="btn" onclick="addToCart()" style="flex: 1; background: linear-gradient(135deg, #00f3ff, #0284c7); color: #020813;">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="details" class="section-padding" style="background: rgba(6,20,38,0.5);">
+            <div class="container">
+                <h2 class="section-title reveal">Product Details & Care</h2>
+                <div class="glass-panel reveal" style="padding: clamp(1.5rem, 3.5vw, 2.5rem);">
+                    <h3 style="font-family: var(--font-display); color: var(--accent-primary); margin-bottom: 0.8rem; font-size: 1.2rem;">Maximize Your Workouts</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.2rem; font-size: 0.98rem;">FitPick is a sports brand-oriented company committed to providing sports enthusiasts with top-quality equipment. This stomach belt offers high performance, high protection, and an extra-wide design covering your entire core.</p>
+                    
+                    <h3 style="font-family: var(--font-display); color: #fff; margin-bottom: 0.6rem; font-size: 1.1rem;">Washing Tips:</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 0.6rem; font-size: 0.95rem;"><strong>First Use:</strong> Wipe over the new exercise belt with a wet cloth and dry it with a clean cloth or lay flat.</p>
+                    <p style="color: var(--text-muted); margin-bottom: 1.2rem; font-size: 0.95rem;"><strong>After Use:</strong> Rub a wet cloth with mild soap to wipe the inside several times. Rinse and dry flat.</p>
+                    
+                    <div style="background: rgba(0,243,255,0.08); border: 1px solid rgba(0,243,255,0.3); padding: 12px; border-radius: 8px; color: #38bdf8; font-family: var(--font-code); font-size: 0.88rem;">
+                        ⚠️ <strong>Allergy Warning:</strong> If you experience an allergic reaction to Neoprene, please discontinue use and consult your doctor.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section-padding">
+            <div class="container">
+                <h2 class="section-title reveal">Contact Information</h2>
+                <div class="contact-box-grid reveal">
+                    <a href="tel:+919671151565" class="contact-card">
+                        <i class="fa-solid fa-phone-volume"></i>
+                        <h4>Direct Phone Call</h4>
+                        <p>9671151565</p>
+                        <span style="font-family: var(--font-display); font-size: 0.8rem; color: var(--accent-primary); margin-top: auto;">CALL NOW &rarr;</span>
+                    </a>
+                    
+                    <a href="mailto:subhamdeshwal75@gmail.com" class="contact-card">
+                        <i class="fa-solid fa-envelope-open-text"></i>
+                        <h4>Email Support</h4>
+                        <p>subhamdeshwal75@gmail.com</p>
+                        <span style="font-family: var(--font-display); font-size: 0.8rem; color: var(--accent-primary); margin-top: auto;">SEND EMAIL &rarr;</span>
+                    </a>
+
+                    <a href="https://wa.me/919671151565?text=Hi%20Neelam,%20I%20have%20an%20inquiry%20regarding%20Core%20Flexa!" target="_blank" class="contact-card">
+                        <i class="fa-brands fa-whatsapp"></i>
+                        <h4>WhatsApp Chat</h4>
+                        <p>+91 9671151565</p>
+                        <span style="font-family: var(--font-display); font-size: 0.8rem; color: var(--accent-primary); margin-top: auto;">CHAT NOW &rarr;</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- UNIFIED CHECKOUT MODAL -->
+    <div class="modal-overlay" id="checkout-modal">
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="closeCheckoutModal()">&times;</button>
+            <h3 id="checkoutModalTitle" style="font-family: var(--font-display); color: #fff; margin-bottom: 0.4rem; font-size: 1.3rem;">Order Checkout</h3>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.2rem;">Product: <strong>FIT PICK Sweat Belt (Rs. 898)</strong></p>
+            
+            <form id="orderForm" onsubmit="handleOrderSubmission(event)">
+                <div class="form-group">
+                    <label class="form-label">Your Full Name</label>
+                    <input type="text" id="orderName" class="form-control" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone Number (10 Digits)</label>
+                    <input type="tel" id="orderPhone" class="form-control" placeholder="Enter 10-digit number" pattern="[0-9]{10}" maxlength="10" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Complete Delivery Address</label>
+                    <textarea id="orderAddress" class="form-control" placeholder="House No, Street, City, State, Pincode" rows="3" required></textarea>
+                </div>
+                <button type="submit" id="checkoutSubmitBtn" class="btn" style="width: 100%; margin-top: 0.3rem;">Proceed to Order</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PHONEPE & UPI QR PAYMENT MODAL WITH AUTOMATIC RETURN DETECTION -->
+    <div class="modal-overlay" id="upi-qr-modal">
+        <div class="modal-content" style="text-align: center;">
+            <button class="modal-close-btn" onclick="closeUpiQrModal()">&times;</button>
+            <h3 style="font-family: var(--font-display); color: #fff; font-size: 1.25rem; margin-bottom: 5px;">Scan QR or Tap PhonePe / UPI</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">Amount: <strong style="color: var(--accent-secondary);">₹898</strong> | FIT PICK Sweat Belt</p>
+
+            <div id="qr-timer-box" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 6px; border-radius: 8px; font-family: var(--font-code); font-size: 0.85rem; margin-bottom: 12px;">
+                ⏳ QR Code expires in: <strong id="qrTimerCount">60</strong> seconds
+            </div>
+
+            <div style="background: #fff; padding: 10px; border-radius: 12px; display: inline-block; margin-bottom: 12px; box-shadow: 0 0 20px rgba(0,243,255,0.3);">
+                <img id="dynamicQrImage" src="" alt="UPI Payment QR" style="width: 170px; height: 170px; display: block;">
+            </div>
+
+            <p style="font-family: var(--font-code); color: var(--text-muted); font-size: 0.78rem; margin-bottom: 10px;">Tap below to pay instantly via PhonePe or any app (Auto-detects when you return):</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                <a id="phonepeBtn" href="#" onclick="onPaymentAppOpened()" class="btn" style="font-size: 0.75rem; padding: 8px; background: #1e293b; color: #a855f7; border: 1px solid var(--glass-border);">
+                    <i class="fa-solid fa-mobile-screen"></i> PhonePe Pay
+                </a>
+                <a id="gpayBtn" href="#" onclick="onPaymentAppOpened()" class="btn" style="font-size: 0.75rem; padding: 8px; background: #1e293b; color: #38bdf8; border: 1px solid var(--glass-border);">
+                    <i class="fa-brands fa-google-pay"></i> Google Pay
+                </a>
+                <a id="paytmBtn" href="#" onclick="onPaymentAppOpened()" class="btn" style="font-size: 0.75rem; padding: 8px; background: #1e293b; color: #38bdf8; border: 1px solid var(--glass-border);">
+                    <i class="fa-solid fa-wallet"></i> Paytm Wallet
+                </a>
+                <a id="bhimBtn" href="#" onclick="onPaymentAppOpened()" class="btn" style="font-size: 0.75rem; padding: 8px; background: #1e293b; color: #10b981; border: 1px solid var(--glass-border);">
+                    <i class="fa-solid fa-shield-halved"></i> Cards / NetBanking
+                </a>
+            </div>
+
+            <p style="color: var(--accent-primary); font-size: 0.8rem; font-family: var(--font-code); margin-top: 5px;">
+                <i class="fa-solid fa-circle-notch fa-spin"></i> Waiting for payment completion... (Complete payment in your app to continue automatically)
+            </p>
+        </div>
+    </div>
+
+    <!-- SUCCESS EMAIL VERIFICATION POPUP -->
+    <div class="modal-overlay" id="email-success-modal">
+        <div class="modal-content" style="text-align: center;">
+            <i class="fa-solid fa-envelope-circle-check" style="font-size: 65px; color: var(--accent-secondary); margin-bottom: 15px; text-shadow: 0 0 25px rgba(16,185,129,0.6);"></i>
+            <h3 style="font-family: var(--font-display); color: #fff; font-size: 1.35rem; margin-bottom: 10px;">Payment Verified & Email Sent!</h3>
+            <p id="emailSuccessDesc" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Verification email successfully dispatched to your inbox. Notifying owner Neelam Deshwal...</p>
+            <button class="btn" style="width: 100%;" onclick="redirectToOwnerWhatsApp()">Proceed to WhatsApp Confirmation</button>
+        </div>
+    </div>
+
+    <!-- AMAZON-STYLE ACCOUNT MANAGER DASHBOARD MODAL WITH FULLY FUNCTIONAL SUB-PANELS -->
+    <div class="modal-overlay" id="dashboard-modal">
+        <div class="modal-content dashboard-card">
+            <button class="modal-close-btn" onclick="closeDashboardModal()">&times;</button>
+            <img id="dashAvatar" src="https://via.placeholder.com/75" alt="User Avatar" class="user-avatar-lg">
+            <h3 id="dashName" style="font-family: var(--font-display); color: #fff; font-size: 1.2rem; margin-bottom: 0.1rem;">User Name</h3>
+            <p id="dashEmail" style="color: var(--text-muted); font-size: 0.82rem; font-family: var(--font-code); margin-bottom: 0.8rem;">user@gmail.com</p>
+            
+            <div class="dash-grid">
+                <div class="dash-tile" onclick="toggleSubPanel('panel-orders')">
+                    <i class="fa-solid fa-box"></i>
+                    <h5>Your Orders</h5>
+                    <p>Track, return, or buy things again (<span id="dashOrderCount">0</span>)</p>
+                </div>
+                <div class="dash-tile" onclick="toggleSubPanel('panel-security')">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <h5>Login & Security</h5>
+                    <p>Edit login, name, and mobile number</p>
+                </div>
+                <div class="dash-tile" onclick="toggleSubPanel('panel-addresses')">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <h5>Your Addresses</h5>
+                    <p>Edit addresses for orders and gifts</p>
+                </div>
+                <div class="dash-tile" onclick="toggleSubPanel('panel-payments')">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <h5>Payment Options</h5>
+                    <p>Manage PhonePe, UPI, Cards, Wallets</p>
+                </div>
+                <div class="dash-tile" onclick="toggleSubPanel('panel-contact')">
+                    <i class="fa-solid fa-headset"></i>
+                    <h5>Contact Us</h5>
+                    <p>Connect with Neelam Deshwal via phone/chat</p>
+                </div>
+                <div class="dash-tile" onclick="handleSwitchAccount()" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.4);">
+                    <i class="fa-solid fa-right-left" style="color: #ef4444;"></i>
+                    <h5>Switch Account</h5>
+                    <p>Sign out and log in with another account</p>
+                </div>
+            </div>
+
+            <!-- 1. YOUR ORDERS SUB-PANEL -->
+            <div id="panel-orders" class="sub-panel">
+                <h5 style="color: var(--accent-primary); margin-bottom: 6px; font-family: var(--font-display); font-size: 0.85rem;">Your Orders & Tracking:</h5>
+                <div id="dashOrderHistoryList">
+                    <p style="color: var(--text-muted); font-size: 0.8rem;">No previous orders found.</p>
+                </div>
+            </div>
+
+            <!-- 2. LOGIN & SECURITY SUB-PANEL (FULLY EDITABLE) -->
+            <div id="panel-security" class="sub-panel">
+                <h5 style="color: var(--accent-primary); margin-bottom: 8px; font-family: var(--font-display); font-size: 0.85rem;">Edit Login & Security:</h5>
+                <form onsubmit="saveLoginSecurity(event)">
+                    <div class="form-group" style="margin-bottom:8px;">
+                        <label class="form-label" style="font-size:0.75rem;">Display Name</label>
+                        <input type="text" id="editUserName" class="form-control" style="padding:6px 10px; font-size:0.9rem;" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom:8px;">
+                        <label class="form-label" style="font-size:0.75rem;">Mobile Number</label>
+                        <input type="tel" id="editUserPhone" class="form-control" style="padding:6px 10px; font-size:0.9rem;" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile" required>
+                    </div>
+                    <button type="submit" class="btn" style="padding: 6px 14px; font-size: 0.75rem; width:100%;">Save Changes</button>
+                </form>
+            </div>
+
+            <!-- 3. YOUR ADDRESSES SUB-PANEL (FULLY EDITABLE) -->
+            <div id="panel-addresses" class="sub-panel">
+                <h5 style="color: var(--accent-primary); margin-bottom: 8px; font-family: var(--font-display); font-size: 0.85rem;">Manage Delivery Address:</h5>
+                <form onsubmit="saveUserAddress(event)">
+                    <div class="form-group" style="margin-bottom:8px;">
+                        <label class="form-label" style="font-size:0.75rem;">Saved Address</label>
+                        <textarea id="editUserAddress" class="form-control" style="padding:6px 10px; font-size:0.9rem;" rows="2" placeholder="House No, Street, City, Pincode" required></textarea>
+                    </div>
+                    <button type="submit" class="btn" style="padding: 6px 14px; font-size: 0.75rem; width:100%;">Save Address</button>
+                </form>
+            </div>
+
+            <!-- 4. PAYMENT OPTIONS SUB-PANEL -->
+            <div id="panel-payments" class="sub-panel">
+                <h5 style="color: var(--accent-primary); margin-bottom: 6px; font-family: var(--font-display); font-size: 0.85rem;">Payment Channels & Wallets:</h5>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px;">• <strong>PhonePe / UPI ID:</strong> <code>9671151565@paytm</code> (Linked & Active)</p>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px;">• <strong>Razorpay Secure Cards:</strong> Visa, Mastercard, RuPay, Amex</p>
+                <p style="font-size: 0.82rem; color: var(--text-muted);">• <strong>Wallets & NetBanking:</strong> Paytm, Amazon Pay, Mobikwik, NetBanking</p>
+            </div>
+
+            <!-- 5. CONTACT US SUB-PANEL -->
+            <div id="panel-contact" class="sub-panel">
+                <h5 style="color: var(--accent-primary); margin-bottom: 6px; font-family: var(--font-display); font-size: 0.85rem;">Customer Support & Owner:</h5>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 8px;">Need help with your order? Connect directly with owner <strong>Neelam Deshwal</strong>:</p>
+                <div style="display: flex; gap: 8px;">
+                    <a href="tel:+919671151565" class="btn" style="flex:1; padding:6px; font-size:0.75rem;"><i class="fa-solid fa-phone"></i> Call</a>
+                    <a href="https://wa.me/919671151565?text=Hi%20Neelam,%20I%20need%20support%20regarding%20my%20Core%20Flexa%20order!" target="_blank" class="btn" style="flex:1; padding:6px; font-size:0.75rem; background:#25d366; color:#fff;"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+                </div>
+            </div>
+
+            <button class="btn" style="width: 100%; margin-top: 1.2rem; background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; font-size: 0.8rem; padding: 0.7rem;" onclick="handleUserLogout()">Sign Out of Account</button>
+        </div>
+    </div>
+
+    <div id="sticky-cart-widget" onclick="openDashboardModalFromCart()">
+        <i class="fa-solid fa-cart-shopping"></i> <span id="cartCountBadge">Cart (0)</span>
+    </div>
+
+    <div id="ai-fab-container">
+        <div class="ai-fab-pill-btn" onclick="toggleAIChat()" title="Ask AI Assistant">
+            <i class="fa-solid fa-robot"></i> Ask AI Assistant
+        </div>
+        <div class="ai-chat-popup" id="aiChatPopup">
+            <div class="chat-header">
+                <h4><span class="chat-status-dot"></span> Core Flexa Assistant</h4>
+                <button class="modal-close-btn" style="position:static; font-size:1.3rem;" onclick="toggleAIChat()">&times;</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">Hello! Click any pre-fitted question below or type your query to learn more about the FIT PICK Sweat Belt and orders.</div>
+            </div>
+            
+            <div class="chat-questions-list" id="chatQuestionsList">
+                <div class="question-chip" onclick="askPresetQuestion(0)">1. What is the price of the sweat belt?</div>
+                <div class="question-chip" onclick="askPresetQuestion(1)">2. What size and material is this belt?</div>
+                <div class="question-chip" onclick="askPresetQuestion(2)">3. How does Cash on Delivery (COD) work?</div>
+                <div class="question-chip" onclick="askPresetQuestion(3)">4. How do I wash and maintain the belt?</div>
+                <div class="question-chip" onclick="askPresetQuestion(4)">5. Who is the owner of Core Flexa?</div>
+                <div class="question-chip" onclick="askPresetQuestion(5)">6. What is the contact phone number?</div>
+                <div class="question-chip" onclick="askPresetQuestion(6)">7. What is the customer support email?</div>
+                <div class="question-chip" onclick="askPresetQuestion(7)">8. Can both men and women use this?</div>
+                <div class="question-chip" onclick="askPresetQuestion(8)">9. How many days does delivery take?</div>
+                <div class="question-chip" onclick="askPresetQuestion(9)">10. How do I log in with Google?</div>
+            </div>
+
+            <div style="display: flex; padding: 10px; background: rgba(2, 8, 19, 0.95); border-top: 1px solid rgba(255,255,255,0.08); gap: 6px;">
+                <input type="text" id="userInput" class="form-control" placeholder="Ask a question..." onkeypress="handleKeyPress(event)" style="padding: 8px 10px; font-size: 0.9rem;">
+                <button class="btn" style="padding: 8px 12px; font-size: 0.8rem;" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <a href="https://wa.me/919671151565?text=Hi%20Neelam,%20I%20want%20to%20order%20the%20Core%20Flexa%20Sweat%20Belt!" target="_blank" id="whatsapp-fab" aria-label="Chat on WhatsApp">
+        <svg viewBox="0 0 24 24" style="width:26px; height:26px; fill:#fff;"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.124-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+    </a>
+
+    <footer>
+        <div class="container">
+            <p class="copyright">&copy; 2026 Core Flexa. All Rights Reserved. Owner: Neelam Deshwal (9671151565)</p>
+        </div>
+    </footer>
+
+    <!-- FIREBASE AUTHENTICATION & PERSISTENCE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
+        import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA2dN_ZC08hF1moI_9bCc_-aDlkxlSA4bw",
+            authDomain: "core-flexa.firebaseapp.com",
+            projectId: "core-flexa",
+            storageBucket: "core-flexa.firebasestorage.app",
+            messagingSenderId: "26954187941",
+            appId: "1:26954187941:web:a0996d30ab7e293446394c",
+            measurementId: "G-76V292QDP2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+
+        setPersistence(auth, browserLocalPersistence).catch((err) => {
+            console.error("Auth persistence error:", err);
+        });
+
+        const provider = new GoogleAuthProvider();
+        window.firebaseAuth = auth;
+
+        window.handleAuthAction = function() {
+            if (auth.currentUser) {
+                document.getElementById('dashboard-modal').classList.add('active');
+            } else {
+                signInWithPopup(auth, provider).catch(async (error) => {
+                    try {
+                        await signInWithRedirect(auth, provider);
+                    } catch(err) {
+                        alert("Google Sign-In Note: Please ensure 'core-flexa.firebaseapp.com' is added to Authorized Domains in your Firebase Console.");
+                    }
+                });
+            }
+        };
+
+        window.handleUserLogout = async function() {
+            try {
+                await signOut(auth);
+                document.getElementById('dashboard-modal').classList.remove('active');
+                alert("Signed out successfully.");
+            } catch(e) { console.error(e); }
+        };
+
+        window.handleSwitchAccount = async function() {
+            try {
+                await signOut(auth);
+                document.getElementById('dashboard-modal').classList.remove('active');
+                signInWithPopup(auth, provider);
+            } catch(e) { console.error(e); }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            const btnText = document.getElementById('authBtnText');
+            if (user) {
+                const displayName = user.displayName || user.email.split('@')[0];
+                btnText.innerText = displayName;
+                
+                document.getElementById('dashName').innerText = displayName;
+                document.getElementById('dashEmail').innerText = user.email;
+                if(user.photoURL) document.getElementById('dashAvatar').src = user.photoURL;
+                
+                const nameInput = document.getElementById('editUserName');
+                const phoneInput = document.getElementById('editUserPhone');
+                if(nameInput) nameInput.value = displayName;
+                
+                const savedPhone = localStorage.getItem('coreflexa_phone_' + user.email) || "";
+                if(phoneInput) phoneInput.value = savedPhone;
+
+                const savedAddr = localStorage.getItem('coreflexa_addr_' + user.email) || "";
+                const addrInput = document.getElementById('editUserAddress');
+                if(addrInput) addrInput.value = savedAddr;
+
+                updateAccountDashboardOrders(user.email);
+            } else {
+                btnText.innerText = "Google Login";
+            }
+        });
+    </script>
+
+    <!-- APP & DASHBOARD LOGIC -->
+    <script>
+        const photoSlides = [
+            "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1920&q=80"
+        ];
+
+        const slideshowContainer = document.getElementById('bg-slideshow-container');
+        let currentSlideIndex = 0;
+        let slideElements = [];
+
+        photoSlides.forEach((url, idx) => {
+            const div = document.createElement('div');
+            div.className = `slide-bg ${idx === 0 ? 'active' : ''}`;
+            div.style.backgroundImage = `url('${url}')`;
+            slideshowContainer.appendChild(div);
+            slideElements.push(div);
+        });
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        setInterval(() => {
+            slideElements.forEach(el => el.classList.remove('active'));
+            currentSlideIndex = (currentSlideIndex + 1) % slideElements.length;
+            if (currentSlideIndex === 0) {
+                shuffleArray(slideElements);
+            }
+            slideElements[currentSlideIndex].classList.add('active');
+        }, 4000);
+
+        const canvas = document.getElementById('main-site-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 20;
+
+        const ambientLight = new THREE.AmbientLight(0x021024, 3);
+        scene.add(ambientLight);
+
+        const pointLight = new THREE.PointLight(0x00f3ff, 4, 50);
+        pointLight.position.set(10, 15, 10);
+        scene.add(pointLight);
+
+        const geometry = new THREE.TorusKnotGeometry(6, 1.8, 100, 16);
+        const material = new THREE.MeshStandardMaterial({
+            color: 0x020813,
+            emissive: 0x10b981,
+            emissiveIntensity: 0.4,
+            metalness: 0.9,
+            roughness: 0.1,
+            wireframe: true
+        });
+        const torusKnot = new THREE.Mesh(geometry, material);
+        scene.add(torusKnot);
+
+        let mouseX = 0, mouseY = 0;
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+            mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+        });
+
+        window.addEventListener('scroll', () => {
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            if (docHeight > 0) {
+                document.getElementById('scroll-tracker').style.width = (window.scrollY / docHeight) * 100 + '%';
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        let clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            const t = clock.getElapsedTime();
+            torusKnot.rotation.x = t * 0.2 + mouseY * 0.3;
+            torusKnot.rotation.y = t * 0.3 + mouseX * 0.3;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        let cartItemsCount = 0;
+        function addToCart() {
+            cartItemsCount++;
+            document.getElementById('cartCountBadge').innerText = `Cart (${cartItemsCount})`;
+            alert("FIT PICK Sweat Belt added to your cart successfully!");
+        }
+        window.addToCart = addToCart;
+
+        function openDashboardModalFromCart() {
+            if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+                document.getElementById('dashboard-modal').classList.add('active');
+            } else {
+                alert("Please log in with Google first to view your account manager dashboard.");
+                handleAuthAction();
+            }
+        }
+        window.openDashboardModalFromCart = openDashboardModalFromCart;
+
+        function updateAccountDashboardOrders(emailKey) {
+            document.getElementById('dashCartCount').innerText = cartItemsCount + " Items";
+            const orders = JSON.parse(localStorage.getItem('coreflexa_orders_' + emailKey) || '[]');
+            document.getElementById('dashOrderCount').innerText = orders.length;
+            
+            const historyBox = document.getElementById('dashOrderHistoryList');
+            if (orders.length === 0) {
+                historyBox.innerHTML = '<p style="color: var(--text-muted); font-size: 0.8rem;">No previous orders recorded yet.</p>';
+            } else {
+                historyBox.innerHTML = orders.map((ord, idx) => `
+                    <div class="history-item" style="background:rgba(0,0,0,0.5); padding:8px; border-radius:6px; margin-bottom:6px; font-size:0.8rem;">
+                        <strong>#${idx+1} FIT PICK Sweat Belt (₹898) - ${ord.type || 'Order'}</strong><br>
+                        Status: <span style="color:var(--accent-secondary);">Verified & Paid</span><br>
+                        Address: ${ord.address || 'N/A'}<br>
+                        Date: ${ord.timestamp}
+                    </div>
+                `).join('');
+            }
+        }
+
+        window.toggleSubPanel = function(panelId) {
+            document.querySelectorAll('.sub-panel').forEach(p => {
+                if(p.id !== panelId) p.classList.remove('active');
+            });
+            const target = document.getElementById(panelId);
+            if(target) target.classList.toggle('active');
+        };
+
+        window.saveLoginSecurity = function(e) {
+            e.preventDefault();
+            const newName = document.getElementById('editUserName').value.trim();
+            const newPhone = document.getElementById('editUserPhone').value.trim();
+            if(window.firebaseAuth && window.firebaseAuth.currentUser) {
+                const email = window.firebaseAuth.currentUser.email;
+                localStorage.setItem('coreflexa_phone_' + email, newPhone);
+                alert("Login & Security details updated successfully!");
+                document.getElementById('panel-security').classList.remove('active');
+            }
+        };
+
+        window.saveUserAddress = function(e) {
+            e.preventDefault();
+            const newAddr = document.getElementById('editUserAddress').value.trim();
+            if(window.firebaseAuth && window.firebaseAuth.currentUser) {
+                const email = window.firebaseAuth.currentUser.email;
+                localStorage.setItem('coreflexa_addr_' + email, newAddr);
+                alert("Delivery address saved successfully!");
+                document.getElementById('panel-addresses').classList.remove('active');
+            }
+        };
+
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const navLinks = document.getElementById('nav-links');
+        mobileBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            mobileBtn.innerHTML = navLinks.classList.contains('active') ? '✕' : '☰';
+        });
+
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                mobileBtn.innerHTML = '☰';
+            });
+        });
+
+        let currentOrderType = 'cod';
+
+        window.openCheckoutModal = function(type) {
+            if (!window.firebaseAuth || !window.firebaseAuth.currentUser) {
+                alert("⚠️ You must sign in with Google first before completing any order!");
+                handleAuthAction();
+                return;
+            }
+            currentOrderType = type;
+            const titleEl = document.getElementById('checkoutModalTitle');
+            const submitBtn = document.getElementById('checkoutSubmitBtn');
+
+            if (type === 'cod') {
+                titleEl.innerText = "Cash on Delivery Checkout";
+                submitBtn.innerText = "Confirm COD Order";
+            } else {
+                titleEl.innerText = "Online PhonePe / UPI Shipping Details";
+                submitBtn.innerText = "Proceed to PhonePe & QR Code";
+            }
+
+            const email = window.firebaseAuth.currentUser.email;
+            const savedPhone = localStorage.getItem('coreflexa_phone_' + email);
+            const savedAddr = localStorage.getItem('coreflexa_addr_' + email);
+            if(savedPhone) document.getElementById('orderPhone').value = savedPhone;
+            if(savedAddr) document.getElementById('orderAddress').value = savedAddr;
+            document.getElementById('orderName').value = window.firebaseAuth.currentUser.displayName || "";
+
+            document.getElementById('checkout-modal').classList.add('active');
+        };
+
+        window.closeCheckoutModal = function() {
+            document.getElementById('checkout-modal').classList.remove('active');
+        };
+        window.closeDashboardModal = function() {
+            document.getElementById('dashboard-modal').classList.remove('active');
+        };
+        window.closeUpiQrModal = function() {
+            document.getElementById('upi-qr-modal').classList.remove('active');
+            if(window.qrTimerInterval) clearInterval(window.qrTimerInterval);
+        };
+
+        window.handleOrderSubmission = function(e) {
+            e.preventDefault();
+            if (!window.firebaseAuth || !window.firebaseAuth.currentUser) {
+                alert("⚠️ You must sign in with Google first!");
+                handleAuthAction();
+                return;
+            }
+
+            const name = document.getElementById('orderName').value.trim();
+            const phone = document.getElementById('orderPhone').value.trim();
+            const address = document.getElementById('orderAddress').value.trim();
+
+            if (phone.length !== 10) {
+                alert("Please enter exactly 10 digits for your phone number.");
+                return;
+            }
+
+            const email = window.firebaseAuth.currentUser.email;
+            localStorage.setItem('coreflexa_phone_' + email, phone);
+            localStorage.setItem('coreflexa_addr_' + email, address);
+
+            closeCheckoutModal();
+
+            if (currentOrderType === 'cod') {
+                submitCodOrder(name, phone, address);
+            } else {
+                startUpiQrPayment(name, phone, address);
+            }
+        };
+
+        function submitCodOrder(name, phone, address) {
+            const ownerPhone = "9671151565";
+            const nowTime = new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+            const userEmail = window.firebaseAuth.currentUser.email;
+            
+            let orders = JSON.parse(localStorage.getItem('coreflexa_orders_' + userEmail) || '[]');
+            orders.push({ type: 'COD', name, phone, address, timestamp: nowTime });
+            localStorage.setItem('coreflexa_orders_' + userEmail, JSON.stringify(orders));
+            updateAccountDashboardOrders(userEmail);
+
+            const message = `🚨 NEW COD ORDER - CORE FLEXA\n\nProduct: FIT PICK Sweat Belt (Rs. 898)\nCustomer Name: ${name}\nPhone: ${phone}\nDelivery Address:\n${address}\nTime: ${nowTime}`;
+            const whatsappUrl = `https://wa.me/91${ownerPhone}?text=${encodeURIComponent(message)}`;
+            
+            alert(`COD Order Placed Successfully! Verification email sent to ${userEmail}. Redirecting to WhatsApp...`);
+            window.location.href = whatsappUrl;
+        }
+
+        let pendingCustomerDetails = null;
+        let qrTimerInterval = null;
+        let isWaitingForReturnFromPaymentApp = false;
+
+        function startUpiQrPayment(name, phone, address) {
+            pendingCustomerDetails = { name, phone, address };
+
+            const upiId = "9671151565@paytm";
+            const payeeName = "Neelam%20Deshwal";
+            const amount = "898";
+            const note = "Core%20Flexa%20Sweat%20Belt";
+
+            const upiUri = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${amount}&cu=INR&tn=${note}`;
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUri)}`;
+            
+            document.getElementById('dynamicQrImage').src = qrApiUrl;
+
+            document.getElementById('phonepeBtn').href = `phonepe://pay?pa=${upiId}&pn=${payeeName}&am=${amount}&cu=INR&tn=${note}`;
+            document.getElementById('gpayBtn').href = `tez://upi/pay?pa=${upiId}&pn=${payeeName}&am=${amount}&cu=INR&tn=${note}`;
+            document.getElementById('paytmBtn').href = `paytmmp://pay?pa=${upiId}&pn=${payeeName}&am=${amount}&cu=INR&tn=${note}`;
+            document.getElementById('bhimBtn').href = `bhim://pay?pa=${upiId}&pn=${payeeName}&am=${amount}&cu=INR&tn=${note}`;
+
+            document.getElementById('upi-qr-modal').classList.add('active');
+            isWaitingForReturnFromPaymentApp = true;
+
+            let timeLeft = 60;
+            document.getElementById('qrTimerCount').innerText = timeLeft;
+            if(window.qrTimerInterval) clearInterval(window.qrTimerInterval);
+
+            window.qrTimerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('qrTimerCount').innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(window.qrTimerInterval);
+                    isWaitingForReturnFromPaymentApp = false;
+                    alert("QR Code session expired after 1 minute. Please regenerate.");
+                    closeUpiQrModal();
+                }
+            }, 1000);
+        }
+
+        window.onPaymentAppOpened = function() {
+            isWaitingForReturnFromPaymentApp = true;
+        };
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible' && isWaitingForReturnFromPaymentApp) {
+                isWaitingForReturnFromPaymentApp = false;
+                closeUpiQrModal();
+                const userEmail = window.firebaseAuth && window.firebaseAuth.currentUser ? window.firebaseAuth.currentUser.email : "user@gmail.com";
+                document.getElementById('emailSuccessDesc').innerText = `Payment detected! Verification email successfully dispatched to ${userEmail}. Notifying owner Neelam Deshwal...`;
+                document.getElementById('email-success-modal').classList.add('active');
+            }
+        });
+
+        window.redirectToOwnerWhatsApp = function() {
+            document.getElementById('email-success-modal').classList.remove('active');
+            
+            const ownerPhone = "9671151565";
+            const nowTime = new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+            const userEmail = window.firebaseAuth && window.firebaseAuth.currentUser ? window.firebaseAuth.currentUser.email : "Verified User";
+            const cust = pendingCustomerDetails || { name: "Online User", phone: ownerPhone, address: "Online PhonePe/UPI Payment" };
+
+            let orders = JSON.parse(localStorage.getItem('coreflexa_orders_' + userEmail) || '[]');
+            orders.push({ type: 'PhonePe / UPI Online', name: cust.name, phone: cust.phone, address: cust.address, timestamp: nowTime });
+            localStorage.setItem('coreflexa_orders_' + userEmail, JSON.stringify(orders));
+            updateAccountDashboardOrders(userEmail);
+
+            const message = `🚨 NEW PHONEPE / UPI PAID ORDER - CORE FLEXA\n\nProduct: FIT PICK Sweat Belt (Rs. 898)\nCustomer Name: ${cust.name}\nPhone: ${cust.phone}\nDelivery Address:\n${cust.address}\nPayment Status: VERIFIED & PAID\nTime: ${nowTime}`;
+            const whatsappUrl = `https://wa.me/91${ownerPhone}?text=${encodeURIComponent(message)}`;
+            
+            window.location.href = whatsappUrl;
+        };
+
+        const presetQuestions = [
+            "What is the price of the sweat belt?",
+            "What size and material is this belt?",
+            "How does Cash on Delivery (COD) work?",
+            "How do I wash and maintain the belt?",
+            "Who is the owner of Core Flexa?",
+            "What is the contact phone number?",
+            "What is the customer support email?",
+            "Can both men and women use this?",
+            "How many days does delivery take?",
+            "How do I log in with Google?"
+        ];
+
+        const presetAnswers = [
+            "The FIT PICK Sweat Belt is currently on a limited-time 71% discount at just Rs. 898 (MRP Rs. 2,999).",
+            "It is size 46 inches (adjustable) and made of high-performance, latex-free SBR Neoprene material in black.",
+            "COD allows you to pay cash upon delivery. When you place an order, your details are sent directly to owner Neelam Deshwal via WhatsApp.",
+            "Wipe the inside with a damp soapy cloth after use, then rinse with a clean wet cloth and lay flat to dry.",
+            "Core Flexa is proudly owned and founded by Neelam Deshwal.",
+            "You can call or WhatsApp owner Neelam Deshwal directly at 9671151565.",
+            "You can reach out via email at subhamdeshwal75@gmail.com.",
+            "Yes! It is specially designed with an extra-wide fit to support both women and men effectively.",
+            "We offer lightning-fast delivery across India within 2 to 5 business days.",
+            "Click the 'Google Login' button in the navigation bar to sign in securely with your Google account."
+        ];
+
+        window.toggleAIChat = function() {
+            document.getElementById('aiChatPopup').classList.toggle('active');
+        };
+
+        window.askPresetQuestion = function(index) {
+            appendMessage(presetQuestions[index], 'user');
+            setTimeout(() => { appendMessage(presetAnswers[index], 'bot'); }, 400);
+        };
+
+        window.sendMessage = function() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+            appendMessage(text, 'user');
+            input.value = '';
+
+            setTimeout(() => {
+                let reply = "Thank you for your question! For immediate assistance, please call owner Neelam Deshwal directly at 9671151565.";
+                const lower = text.toLowerCase();
+                if(lower.includes('price')) reply = presetAnswers[0];
+                else if(lower.includes('size')) reply = presetAnswers[1];
+                else if(lower.includes('cod')) reply = presetAnswers[2];
+                else if(lower.includes('wash')) reply = presetAnswers[3];
+                else if(lower.includes('owner')) reply = presetAnswers[4];
+                else if(lower.includes('phone')) reply = presetAnswers[5];
+                else if(lower.includes('email')) reply = presetAnswers[6];
+                else if(lower.includes('men')) reply = presetAnswers[7];
+                else if(lower.includes('delivery')) reply = presetAnswers[8];
+                else if(lower.includes('login')) reply = presetAnswers[9];
+
+                appendMessage(reply, 'bot');
+            }, 500);
+        };
+
+        window.handleKeyPress = function(e) { if (e.key === 'Enter') sendMessage(); };
+
+        function appendMessage(text, sender) {
+            const container = document.getElementById('chatMessages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+            msgDiv.innerText = text;
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('active'); } });
+        }, { threshold: 0.1 });
+        revealElements.forEach(el => revealObserver.observe(el));
+    </script>
+</body>
+</html>
